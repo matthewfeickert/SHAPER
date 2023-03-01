@@ -1,4 +1,3 @@
-
 # Standard Imports
 from pyshaper.utils.plot_utils import make_gif, plot_event, plot_observable
 from geomloss import SamplesLoss
@@ -221,7 +220,7 @@ class Shaper(nn.Module):
             if title == "":
                 _title = obs
             else:
-                _title = "%s, %s" % (obs, title)
+                _title = f"{obs}, {title}"
 
             if gif_extention != "":
                 filename = os.path.join(dir, "event_%d_%s.gif.png" % (i, gif_extention))

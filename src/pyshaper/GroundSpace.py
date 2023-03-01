@@ -1,5 +1,3 @@
-
-
 class Patch2D():
 
     def __init__(self, ys, phis):

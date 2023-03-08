@@ -5,6 +5,8 @@ from time import time
 
 # Jets
 from pyjet import cluster
+import awkward as ak
+import fastjet
 
 # ML
 import torch
@@ -160,7 +162,10 @@ class Observable(nn.Module):
                     # if N > 1:
                     #     raise NotImplementedError("N > 1 circle initializer not implemented yet.")
 
-                    reclustered = cluster(jets[0].constituents_array(), R=self.R, p=1)
+                    # reclustered = cluster(jets[0].constituents_array(), R=self.R, p=1)
+                    jet_def = fastjet.JetDefinition(fastjet.kt_algorithm, self.R)
+                    clustered_jets = fastjet.ClusterSequence(ak.from_numpy(jets[0].constituents_array()), jet_def)
+                    reclustered = clustered_jets.inclusive_jets()
 
                     # Make the assumption that the harder jet is the point and the softer one is the radius
                     p, e = exclusive_jets(cluster_sequence, N)

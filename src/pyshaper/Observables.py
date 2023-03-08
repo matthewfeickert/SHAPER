@@ -4,7 +4,7 @@ import copy
 from time import time
 
 # Jets
-from pyjet import cluster
+from pyjet import cluster as pyjetcluster
 import awkward as ak
 import fastjet
 
@@ -118,6 +118,7 @@ class Observable(nn.Module):
             N = self.params["Points"].shape[0]
 
             # cluster_sequence = kt_initializer(event, self.R)
+            print(kt_initializer(event, self.R))
             jet_def_kt = fastjet.JetDefinition(fastjet.kt_algorithm, self.R)
             print(f"{event=}")
             cluster_sequence = fastjet.ClusterSequence(ak.from_numpy(event), jet_def_kt)
@@ -167,7 +168,7 @@ class Observable(nn.Module):
                     # if N > 1:
                     #     raise NotImplementedError("N > 1 circle initializer not implemented yet.")
 
-                    # reclustered = cluster(jets[0].constituents_array(), R=self.R, p=1)
+                    # reclustered = pyjetcluster(jets[0].constituents_array(), R=self.R, p=1)
                     jet_def = fastjet.JetDefinition(fastjet.kt_algorithm, self.R)
                     # clustered_jets = fastjet.ClusterSequence(ak.from_numpy(jets[0].constituents_array()), jet_def)
                     clustered_jets = fastjet.ClusterSequence(exclusive_jets, jet_def)
@@ -275,8 +276,9 @@ def kt_initializer(event, R):
     for (y_i, z_i) in zip(y, z):
         v = (z_i, y_i[0], y_i[1], 0)
         four_vectors.append(v)
+    # TODO: Make four_vectors an awkward array
     four_vectors = np.array(four_vectors, dtype=[("pt", "f8"), ("eta", "f8"), ("phi", "f8"), ("mass", "f8")])
-    sequence = cluster(four_vectors, R=R, p=1)
+    sequence = pyjetcluster(four_vectors, R=R, p=1)
     return sequence
 
 

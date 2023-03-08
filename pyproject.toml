@@ -37,6 +37,7 @@ dependencies = [
     "torch>=1.10.0",
     "geomloss>=0.2.3",
     "pyjet>=1.9.0",  # FIXME: Deprecated
+    "fastjet>=3.4.0.1",
     "scipy>=1.5.1",
     "matplotlib>=3.5.0",
     "numpy",  # compatible versions controlled through scipy

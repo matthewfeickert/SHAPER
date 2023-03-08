@@ -119,9 +119,11 @@ class Observable(nn.Module):
 
             # cluster_sequence = kt_initializer(event, self.R)
             print(kt_initializer(event, self.R))
+            event_four_vectors = kt_initializer(event, self.R)
             jet_def_kt = fastjet.JetDefinition(fastjet.kt_algorithm, self.R)
-            print(f"{event=}")
-            cluster_sequence = fastjet.ClusterSequence(ak.from_numpy(event), jet_def_kt)
+            print(f"{event_four_vectors=}")
+            # cluster_sequence = fastjet.ClusterSequence(ak.from_numpy(event), jet_def_kt)
+            cluster_sequence = fastjet.ClusterSequence(event_four_vectors, jet_def_kt)
             exclusive_jets = cluster_sequence.exclusive_jets(N)
 
             if "Points" in self.params.keys():
@@ -275,11 +277,17 @@ def kt_initializer(event, R):
     four_vectors = []
     for (y_i, z_i) in zip(y, z):
         v = (z_i, y_i[0], y_i[1], 0)
-        four_vectors.append(v)
+        # four_vectors.append(v)
+        # four_vectors.append({"pt": z_i, "eta": y_i[0], "phi": y_i[1], "mass":0})
+        # ORDER DIFFERENT THAN pyjet. fastjet uses pt, phi, eta, M
+        # https://vector.readthedocs.io/en/latest/usage/intro.html#NumPy-arrays-of-vectors
+        four_vectors.append({"pt": z_i, "phi": y_i[1], "eta": y_i[0], "M":0})
     # TODO: Make four_vectors an awkward array
-    four_vectors = np.array(four_vectors, dtype=[("pt", "f8"), ("eta", "f8"), ("phi", "f8"), ("mass", "f8")])
-    sequence = pyjetcluster(four_vectors, R=R, p=1)
-    return sequence
+    print(f"{four_vectors=}")
+    return ak.Array(four_vectors)
+    # four_vectors = np.array(four_vectors, dtype=[("pt", "f8"), ("eta", "f8"), ("phi", "f8"), ("mass", "f8")])
+    # sequence = pyjetcluster(four_vectors, R=R, p=1)
+    # return sequence
 
 
 # FIXME for fastjet

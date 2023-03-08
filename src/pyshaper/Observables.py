@@ -116,8 +116,12 @@ class Observable(nn.Module):
 
             # Get the kt-clustering sequence
             N = self.params["Points"].shape[0]
-            cluster_sequence = kt_initializer(event, self.R)
-            jets = cluster_sequence.exclusive_jets(N)
+
+            # cluster_sequence = kt_initializer(event, self.R)
+            jet_def_kt = fastjet.JetDefinition(fastjet.kt_algorithm, self.R)
+            print(f"{event=}")
+            cluster_sequence = fastjet.ClusterSequence(ak.from_numpy(event), jet_def_kt)
+            exclusive_jets = cluster_sequence.exclusive_jets(N)
 
             if "Points" in self.params.keys():
 
@@ -133,7 +137,8 @@ class Observable(nn.Module):
                     e = temp_energies
 
                 else:
-                    points, e = exclusive_jets(cluster_sequence, min(N, event[0].shape[0]))
+                    # FIXME for fastjet
+                    points, e = _exclusive_jets(cluster_sequence, min(N, event[0].shape[0]))
 
                 self.params["Points"].set(points)
 
@@ -164,11 +169,12 @@ class Observable(nn.Module):
 
                     # reclustered = cluster(jets[0].constituents_array(), R=self.R, p=1)
                     jet_def = fastjet.JetDefinition(fastjet.kt_algorithm, self.R)
-                    clustered_jets = fastjet.ClusterSequence(ak.from_numpy(jets[0].constituents_array()), jet_def)
+                    # clustered_jets = fastjet.ClusterSequence(ak.from_numpy(jets[0].constituents_array()), jet_def)
+                    clustered_jets = fastjet.ClusterSequence(exclusive_jets, jet_def)
                     reclustered = clustered_jets.inclusive_jets()
 
                     # Make the assumption that the harder jet is the point and the softer one is the radius
-                    p, e = exclusive_jets(cluster_sequence, N)
+                    p, e = _exclusive_jets(cluster_sequence, N)
                     e = np.array(e)
                     num_weights = self.params["Weights"].N
 
@@ -260,6 +266,7 @@ class Observable(nn.Module):
         return new_param_dict
 
 
+# FIXME for fastjet
 def kt_initializer(event, R):
 
     y, z = event
@@ -273,7 +280,8 @@ def kt_initializer(event, R):
     return sequence
 
 
-def exclusive_jets(sequence, N):
+# FIXME for fastjet
+def _exclusive_jets(sequence, N):
 
     jets = sequence.exclusive_jets(N)
 
